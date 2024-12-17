@@ -7,6 +7,7 @@ local_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "local")
 def get_path_base_name(pathname):
     return os.path.splitext(os.path.basename(pathname))[0]
 
+
 def chop_images(image, coordinates):
     dir_name = get_path_base_name(image.filename)
     input_image_path = save_image(image, dir_name)
