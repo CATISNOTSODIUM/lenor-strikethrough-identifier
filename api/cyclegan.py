@@ -80,6 +80,7 @@ class DatasetHandler: # compatible with the original repository class `CleanStru
 
 
 def predict(dir_name):
+    import re
     config = load_config()
     dataset = DatasetHandler(dir_name, config)
     dataset = DataLoader(dataset, batch_size=config["batch-size"], shuffle=False, num_workers=1)
@@ -90,6 +91,8 @@ def predict(dir_name):
     model.eval()
     predictedLabels = []
     
+    predict_map = {}
+    logging.info("Start predicting")
     with torch.no_grad():
         for datapoints in dataset:
             image = datapoints["image"].to(device)
@@ -98,6 +101,16 @@ def predict(dir_name):
             predicted = torch.nn.functional.softmax(predicted, dim=1)
             predicted = torch.max(predicted, dim=1).indices.cpu().numpy()
             predictedLabels.extend(predicted.tolist())
-            # predicted = 0 (struck)
-            # predicted = 1 (unstruck)
-            print(paths, predicted)
+            # predicted = 0 (strike)
+            # predicted = 1 (unstrike)
+            match = re.search(r'x_(\d+)_y_(\d+)', paths[0])
+            logging.info(paths[0])
+            if match:
+                x = int(match.group(1))  
+                y = int(match.group(2))  
+                outcome = "strikethrough" if (predicted[0] == 0) else "not strikethrough" 
+                predict_map[f"[{x},{y}]"] = outcome
+                logging.info("Processing", x, y, outcome)
+    logging.info("Finish predicting")
+    print(predict_map)
+    return predict_map

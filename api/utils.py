@@ -19,7 +19,6 @@ def pad_image(img, ratio, target_width=400): # ratio w / h
     scale_factor = min(width_ratio, height_ratio)
     new_width = int(original_width * scale_factor)
     new_height = int(original_height * scale_factor)
-    print(new_width, new_height)
     resized_img = img.resize((new_width, new_height), Image.LANCZOS)
     padded_img = Image.new('RGB', (target_width, target_height), (255, 255, 255))
     paste_x = (target_width - new_width) // 2
@@ -35,7 +34,7 @@ def chop_images(image, coordinates):
     output_path = os.path.join(local_path, dir_name, "chopped")
     os.makedirs(output_path, exist_ok=True) 
     
-    
+    order = 0
     for key, coordinate in coordinates.items():
         key_parse = json.loads(key)
         key_x, key_y = key_parse
@@ -45,7 +44,7 @@ def chop_images(image, coordinates):
         img_tmp = img.crop((top_left['x'], top_left['y'], bottom_right['x'], bottom_right['y']))
         img_tmp = pad_image(img_tmp, 4) # make image size consistent by adding padding
         img_tmp.save(os.path.join(output_path, chopped_file_name))
-        
+        order = order + 1
     return dir_name
     
     
@@ -65,4 +64,5 @@ def background_handler(image, coordinates):
     logging.info(f"Chopping image {image.filename} ✂️")
     dir_name = chop_images(image, coordinates)
     logging.info("Finished chopping images")
-    predict(dir_name)
+    predict_map = predict(dir_name)
+    return predict_map

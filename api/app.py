@@ -18,7 +18,7 @@ def upload_image_and_coordinates():
     try:
         image = request.files['image'] 
         coordinates = validate_coordinates(request.form['coordinates'])
-        background_handler(image, coordinates) # Handling task
-        return jsonify(message=f"Successfully processed image", statusCode = 200), 200
+        res = background_handler(image, coordinates) # Handling task
+        return jsonify(message=f"Successfully processed image", data = res, statusCode = 200), 200
     except Exception as e:
         return jsonify(message=f"Error {e}", statusCode = 500), 500
