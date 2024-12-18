@@ -110,7 +110,7 @@ def predict(dir_name):
                 y = int(match.group(2))  
                 outcome = "strikethrough" if (predicted[0] == 0) else "not strikethrough" 
                 predict_map[f"[{x},{y}]"] = outcome
-                logging.info("Processing", x, y, outcome)
     logging.info("Finish predicting")
     print(predict_map)
     return predict_map
+
