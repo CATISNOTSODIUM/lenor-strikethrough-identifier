@@ -34,12 +34,9 @@ def chop_images(image, coordinates):
     img = Image.open(input_image_path)
     output_path = os.path.join(local_path, dir_name, "chopped")
     os.makedirs(output_path, exist_ok=True) 
-    
     order = 0
-    for key, coordinate in coordinates.items():
-        key_parse = json.loads(key)
-        key_x, key_y = key_parse
-        chopped_file_name = f"x_{key_x}_y_{key_y}.jpg"
+    for coordinate in coordinates:
+        chopped_file_name = f"_{order}_.jpg"
         top_left = coordinate[0]
         bottom_right = coordinate[2]
         img_tmp = img.crop((top_left['x'], top_left['y'], bottom_right['x'], bottom_right['y']))
@@ -65,5 +62,5 @@ def background_handler(image, coordinates):
     logging.info(f"Chopping image {image.filename} ✂️")
     dir_name = chop_images(image, coordinates)
     logging.info("Finished chopping images")
-    predict_map = predict(dir_name)
-    return predict_map
+    coordinates = predict(dir_name, coordinates)
+    return coordinates

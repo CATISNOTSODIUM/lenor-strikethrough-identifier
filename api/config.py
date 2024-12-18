@@ -11,5 +11,5 @@ def load_config():
         config["device"] = 'cpu'
     config["width"] = 512
     config["height"] = 128
-    config["batch-size"] = 1
+    config["batch-size"] = 64
     return config

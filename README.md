@@ -19,5 +19,28 @@ You can use the pre-trained model `best_f1.pth` from the original repository htt
 
 ## APIs
 ### `/upload`
-There are many ways to perform `POST` request (such as `Postman`).
+We use `formdata` with two fields: `coordinates` and `image`. 
+```JSON
+[
+    [
+        {"x":404,"y":166},
+        {"x":512,"y":166},
+        {"x":512,"y":186},
+        {"x":404,"y":186},
+        {"description":"significant"}
+    ],
+    [
+        {"x":516,"y":166},
+        {"x":609,"y":166},
+        {"x":609,"y":186},
+        {"x":516,"y":186},
+        {"description":"personal"}
+    ]
+]
+```
 ![alt text](image.png)
+
+## Remark
+Here are some bottlenecks.
+- This flash application cannot efficiently handle multiple requests. 
+- The function `chop_images` in `utils.py` is serialized and slow. This process should be parallelized.

@@ -50,13 +50,17 @@ def load_dataset(dir_name): # from local
     
     return data
  
- 
+def get_number_from_chopped_path(x):
+    return int(repr(x).split('_')[-2])
+
 class DatasetHandler: # compatible with the original repository class `CleanStruckDataset`
     def __init__(self, dir_name, config):
         self.dir_name = dir_name
         self.data = []
         predict_dir = os.path.join(local_path, dir_name, "chopped")
         predict_files = list(Path(predict_dir).glob(IMAGE_EXTENSION))
+        # sort input based on index
+        predict_files = sorted(predict_files, key=get_number_from_chopped_path) 
         self.data.extend([(f, 0) for f in predict_files])
         self.count = len(self.data)
         self.width = config["width"]
@@ -79,11 +83,12 @@ class DatasetHandler: # compatible with the original repository class `CleanStru
         }
 
 
-def predict(dir_name):
-    import re
+def predict(dir_name, coordinates):
     config = load_config()
     dataset = DatasetHandler(dir_name, config)
+
     dataset = DataLoader(dataset, batch_size=config["batch-size"], shuffle=False, num_workers=1)
+    
     
     model = load_model(config["is_dense"], config["device"], default_model_path)
     device = config["device"]
@@ -91,7 +96,6 @@ def predict(dir_name):
     model.eval()
     predictedLabels = []
     
-    predict_map = {}
     logging.info("Start predicting")
     with torch.no_grad():
         for datapoints in dataset:
@@ -101,16 +105,12 @@ def predict(dir_name):
             predicted = torch.nn.functional.softmax(predicted, dim=1)
             predicted = torch.max(predicted, dim=1).indices.cpu().numpy()
             predictedLabels.extend(predicted.tolist())
-            # predicted = 0 (strike)
-            # predicted = 1 (unstrike)
-            match = re.search(r'x_(\d+)_y_(\d+)', paths[0])
-            logging.info(paths[0])
-            if match:
-                x = int(match.group(1))  
-                y = int(match.group(2))  
-                outcome = "strikethrough" if (predicted[0] == 0) else "not strikethrough" 
-                predict_map[f"[{x},{y}]"] = outcome
-    logging.info("Finish predicting")
-    print(predict_map)
-    return predict_map
+    
+    # remove strikethrough words
+    for idx in range(len(predictedLabels) - 1, 0, -1):
+        if (predictedLabels[idx] == 0):
+            del coordinates[idx] 
+
+    logging.info("Finish predicting")       
+    return coordinates
 
