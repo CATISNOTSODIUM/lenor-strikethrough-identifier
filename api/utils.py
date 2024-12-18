@@ -26,6 +26,7 @@ def pad_image(img, ratio, target_width=400): # ratio w / h
     padded_img.paste(resized_img, (paste_x, paste_y))
     return padded_img 
 
+# should be parallelized
 def chop_images(image, coordinates):
     dir_name = get_path_base_name(image.filename)
     input_image_path = save_image(image, dir_name)
