@@ -13,8 +13,12 @@ def get_path_base_name(pathname):
 
 
 def pad_image(img, ratio, target_width=400): # ratio w / h
+    
     target_height = int(target_width / ratio)
     original_width, original_height = img.size
+    if (original_width == 0 or original_height == 0 or ratio == 0):
+        logging.info(f"[PIL] ⚠️ division by zero {original_width} {original_height}")
+        return img # invalid division
     width_ratio = target_width / original_width
     height_ratio = target_height / original_height
     scale_factor = min(width_ratio, height_ratio)
@@ -38,9 +42,15 @@ def chop_images(image, coordinates):
     order = 0
     for coordinate in coordinates:
         chopped_file_name = f"_{order}_.jpg"
-        top_left = coordinate[0]
-        bottom_right = coordinate[2]
-        img_tmp = img.crop((top_left['x'], top_left['y'], bottom_right['x'], bottom_right['y']))
+        # find top_left and bottom_right
+        min_x, max_x = coordinate[0]['x'], coordinate[0]['x'] 
+        min_y, max_y =  coordinate[0]['y'], coordinate[0]['y'] 
+        for idx in range(4):
+            min_x = min(min_x, coordinate[idx]['x'])
+            min_y = min(min_y, coordinate[idx]['y'])
+            max_x = max(max_x, coordinate[idx]['x'])
+            max_y = max(max_y, coordinate[idx]['y'])
+        img_tmp = img.crop((min_x, min_y, max_x, max_y))
         img_tmp = pad_image(img_tmp, 4) # make image size consistent by adding padding
         img_tmp.save(os.path.join(output_path, chopped_file_name))
         order = order + 1
