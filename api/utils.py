@@ -4,6 +4,7 @@ import logging
 from PIL import Image
 from .cyclegan import predict
 import json
+import datetime
 
 local_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "local")
 
@@ -45,13 +46,17 @@ def chop_images(image, coordinates):
         order = order + 1
     return dir_name
     
-    
+def TimestampMillisec64():
+    return str((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 1000) 
+
 def save_image(image, dir_name):
     filename = image.filename
     input_path = os.path.join(local_path, dir_name)
     os.makedirs(input_path, exist_ok=True) 
     
-    original_image_dir = os.path.join(input_path, filename)
+    # append time to file dir
+    original_image_dir = os.path.join(input_path, TimestampMillisec64() + '_' + filename)
+    
     image.save(original_image_dir)
     return original_image_dir
 
@@ -62,5 +67,7 @@ def background_handler(image, coordinates):
     logging.info(f"Chopping image {image.filename} ✂️")
     dir_name = chop_images(image, coordinates)
     logging.info("Finished chopping images")
+    logging.info("Start predicting 🤖")
     coordinates = predict(dir_name, coordinates)
+    logging.info("Finish predicting 😁")       
     return coordinates

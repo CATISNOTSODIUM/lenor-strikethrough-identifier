@@ -46,8 +46,6 @@ def load_model(is_dense = True, device = 'cpu', model_path = default_model_path)
 
 
 def load_dataset(dir_name): # from local
-    logging.info(f"Load datasets from {dir_name}")
-    
     return data
  
 def get_number_from_chopped_path(x):
@@ -96,7 +94,6 @@ def predict(dir_name, coordinates):
     model.eval()
     predictedLabels = []
     
-    logging.info("Start predicting")
     with torch.no_grad():
         for datapoints in dataset:
             image = datapoints["image"].to(device)
@@ -111,6 +108,5 @@ def predict(dir_name, coordinates):
         if (predictedLabels[idx] == 0):
             del coordinates[idx] 
 
-    logging.info("Finish predicting")       
     return coordinates
 
